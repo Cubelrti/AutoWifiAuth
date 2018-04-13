@@ -1,0 +1,8 @@
+.vs
+bin
+obj
+Properties
+x64
+x86
+packages
+*.pfx
