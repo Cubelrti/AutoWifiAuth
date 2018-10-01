@@ -1,4 +1,5 @@
-﻿using AutoWifiAuth.Dtos;
+﻿using AutoWifiAuth.Commands;
+using AutoWifiAuth.Dtos;
 using Hardcodet.Wpf.TaskbarNotification;
 using Newtonsoft.Json;
 using System;
@@ -56,6 +57,51 @@ namespace AutoWifiAuth
             ServiceImpl(source.Token);
         }
 
+        public async Task NewLogin()
+        {
+            var ih = Helpers.Internet.GetInstance();
+
+            // access 10.1.61.1
+            try
+            {
+                await WebLoginMethod(ih);
+            }
+            catch (Exception)
+            {
+                // access 10.10.42.3
+                var data = await ih.GetAsync(Configs.Protocol.serverUri);
+                if ((await data.ReadAsStringAsync()).Contains("注销页"))
+                {
+                    //logined.
+                    return;
+                }
+                // construct url param
+                DateTime baseDate = new DateTime(1970, 1, 1);
+                TimeSpan diff = DateTime.Now - baseDate;
+                var msec = Math.Floor(diff.TotalMilliseconds);
+                var querystr = $"drcom/login?callback=dr{msec}&DDDDD={Username.Text}&upass={Password.Password}&0MKKey=123456&R1=0&R3=0&R6=0&para=00&v6ip=&_={msec}";
+                var signin = await ih.GetAsync(Configs.Protocol.serverUri + querystr);
+                var result = await signin.ReadAsStringAsync();
+                if (result.Contains("NID") || result.Contains("etime"))
+                {
+                    AddState("[AuthClient] Validated.");
+                    // auto remember
+                    User user = new User
+                    {
+                        Username = Username.Text,
+                        Password = Password.Password
+                    };
+                    File.WriteAllText(@"user.json", JsonConvert.SerializeObject(user));
+                    // popup
+                    MyNotifyIcon.ShowBalloonTip("Success", "You are authed into BJTU Wifi.", BalloonIcon.Info);
+                }
+                else
+                {
+                    AddState("[AuthClient] Error.");
+                }
+            }
+        }
+
         public async Task Login()
         {
             var ih = Helpers.Internet.GetInstance();
@@ -78,31 +124,7 @@ namespace AutoWifiAuth
                 code = text.Substring(9, 8);
                 if(code == " html PU")
                 {
-                    var result = await (await ih.PostAsync(Configs.Protocol.anotherServerUri, new Dictionary<string, string> {
-                        {"DDDDD",Username.Text },
-                        {"upass",Password.Password },
-                        {"C2","on" },
-                        {"0MKKey","��¼(Login)" }
-                    })).ReadAsStringAsync();
-                    if (result.Contains("您已经成功登录。"))
-                    {
-                        AddState("[AuthClient] Validated.");
-                        // auto remember
-                        User user = new User
-                        {
-                            Username = Username.Text,
-                            Password = Password.Password
-                        };
-                        File.WriteAllText(@"user.json", JsonConvert.SerializeObject(user));
-                        // popup
-                        MyNotifyIcon.ShowBalloonTip("Success", "You are authed into BJTU Wifi.", BalloonIcon.Info);
-                    }
-                    else
-                    {
-                        AddState("[AuthClient] Error.");
-                    }
-                    AddState("[AuthClient] Validated.");
-                    return;
+                    await WebLoginMethod(ih);
                 }
 
                 AddState("[AuthClient] getcode:" + code);
@@ -150,11 +172,46 @@ namespace AutoWifiAuth
             }
         }
 
+        private async Task WebLoginMethod(Helpers.Internet ih)
+        {
+            var result = await (await ih.PostAsync(Configs.Protocol.anotherServerUri, new Dictionary<string, string> {
+                        {"DDDDD",Username.Text },
+                        {"upass",Password.Password },
+                        {"C2","on" },
+                        {"0MKKey","��¼(Login)" }
+                    })).ReadAsStringAsync();
+            if (result.Contains("您已经成功登录。"))
+            {
+                AddState("[AuthClient] Validated.");
+                // auto remember
+                User user = new User
+                {
+                    Username = Username.Text,
+                    Password = Password.Password
+                };
+                File.WriteAllText(@"user.json", JsonConvert.SerializeObject(user));
+                // popup
+                MyNotifyIcon.ShowBalloonTip("Success", "You are authed into BJTU Wifi.", BalloonIcon.Info);
+            }
+            else
+            {
+                AddState("[AuthClient] Error.");
+                throw new Exception("Web Login Failed");
+            }
+            AddState("[AuthClient] Validated.");
+            return;
+        }
+
         CancellationTokenSource source = new CancellationTokenSource();
 
         private void StopService(object sender, RoutedEventArgs e) {
             source.Cancel();
             AddState("[AuthService] Stopped.");
+        }
+
+        private void Exit(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         private async void ServiceImpl(CancellationToken cancellationToken) {
@@ -166,7 +223,9 @@ namespace AutoWifiAuth
                     //access 10.10.42.3
                     var data = await ih.GetAsync(Configs.Protocol.serverUri);
                     var text = await data.ReadAsStringAsync();
-                    if (text.Contains("注　销"))
+                    var webData = await ih.GetAsync("http://10.1.61.1/3.htm");
+                    var webText = await webData.ReadAsStringAsync();
+                    if (text.Contains("注　销") || webText.Contains("登陆成功"))
                     {
                         //logined.
                         await Task.Delay(60000, cancellationToken);
@@ -174,7 +233,7 @@ namespace AutoWifiAuth
                     else
                     {
                         //try to login.
-                        await Login();
+                        await NewLogin();
                     }
                 }
                 catch (Exception)
@@ -208,15 +267,21 @@ namespace AutoWifiAuth
             try
             {
                 // get saved username and psws
-                User user = JsonConvert.DeserializeObject<User>(File.ReadAllText(@"user.json"));
+                User user = JsonConvert.DeserializeObject<User>(File.ReadAllText(@"./user.json"));
                 AddState("[AuthRemember] OK.");
                 Username.Text = user.Username;
                 Password.Password = user.Password;
+                StartService(this, null);
             }
             catch (IOException)
             {
                 AddState("[AuthRemember] Not Found. Enter manually.");
             }
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            AutoStartup.SetAsStartup();
         }
     }
 }

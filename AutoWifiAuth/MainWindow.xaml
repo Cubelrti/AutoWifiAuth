@@ -23,14 +23,16 @@
                 <ContextMenu>
                     <MenuItem Header="Stop Service" Click="StopService" />
                     <MenuItem Header="Restart Service" Click="StartService" />
+                    <MenuItem Header="Exit" Click="Exit" />
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
         </tb:TaskbarIcon>
         <TextBox Name="Username" HorizontalAlignment="Left" Height="23" Margin="73,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="128"/>
         <PasswordBox Name="Password" HorizontalAlignment="Left" Margin="306,33,0,0" VerticalAlignment="Top" Width="128" Height="23"/>
-        <Button Content="Hide me!" HorizontalAlignment="Left" Margin="170,71,0,0" VerticalAlignment="Top" Width="171" Height="99" Click="Button_Click"/>
+        <Button Content="Hide me!" HorizontalAlignment="Left" Margin="121,103,0,0" VerticalAlignment="Top" Width="118" Height="44" Click="Button_Click"/>
         <ListBox Name="Status" HorizontalAlignment="Left" Height="105" Margin="73,196,0,0" VerticalAlignment="Top" Width="361">
             <ListBoxItem Content="[AuthClient]OK."/>
         </ListBox>
+        <Button Content="Auto StartUp" HorizontalAlignment="Left" Margin="288,103,0,0" VerticalAlignment="Top" Width="118" Height="44" Click="Button_Click_1" />
     </Grid>
 </Window>

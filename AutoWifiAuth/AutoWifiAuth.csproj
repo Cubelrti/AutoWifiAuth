@@ -92,6 +92,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\AutoStartup.cs" />
     <Compile Include="Commands\NetworkChangeListener.cs" />
     <Compile Include="Commands\ShowWindowCommand.cs" />
     <Page Include="MainWindow.xaml">
