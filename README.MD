@@ -12,3 +12,4 @@ Features:
 - Keep in background. Auto authentication when connected.
 - Hide in startbar.
 - Password remembered in json. Don't leak your user.json to anyone.
+- (Optional) automatically startup on boot.
