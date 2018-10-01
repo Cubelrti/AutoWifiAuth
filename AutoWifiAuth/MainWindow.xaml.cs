@@ -223,9 +223,9 @@ namespace AutoWifiAuth
                     //access 10.10.42.3
                     var data = await ih.GetAsync(Configs.Protocol.serverUri);
                     var text = await data.ReadAsStringAsync();
-                    var webData = await ih.GetAsync("http://10.1.61.1/3.htm");
+                    var webData = await ih.GetAsync("http://10.1.61.1");
                     var webText = await webData.ReadAsStringAsync();
-                    if (text.Contains("注　销") || webText.Contains("登陆成功"))
+                    if (text.Contains("注　销") || webText.Contains("注销页"))
                     {
                         //logined.
                         await Task.Delay(60000, cancellationToken);
