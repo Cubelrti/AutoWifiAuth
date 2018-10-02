@@ -27,7 +27,7 @@ namespace AutoWifiAuth.Commands
                 if (n.Name.Contains("WLAN"))
                 {
                     if(n.OperationalStatus == OperationalStatus.Up)
-                        Application.Current.Dispatcher.Invoke(() => window.Login());
+                        Application.Current.Dispatcher.Invoke(() => window.NewLogin());
                     return;
                 }
             }
