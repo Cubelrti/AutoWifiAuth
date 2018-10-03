@@ -1,5 +1,7 @@
 # AutoWifiAuth
-Yet Another Wifi Authentication Client for BJTU Wifi
+Fully Automatic Wifi Authentication Client for BJTU Wifi
+
+Sign in once, keep it in background and forget it forever. No more authentication popups and password remembering issues.
 
 Supported Wifi List:
 
