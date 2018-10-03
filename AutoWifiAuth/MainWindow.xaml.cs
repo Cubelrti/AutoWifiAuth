@@ -225,7 +225,7 @@ namespace AutoWifiAuth
                     var text = await data.ReadAsStringAsync();
                     var webData = await ih.GetAsync("http://10.1.61.1");
                     var webText = await webData.ReadAsStringAsync();
-                    if (text.Contains("注　销") || webText.Contains("注销页"))
+                    if (text.Contains("注销页") || webText.Contains("注销页"))
                     {
                         //logined.
                         await Task.Delay(60000, cancellationToken);
