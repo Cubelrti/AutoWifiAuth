@@ -68,7 +68,7 @@ namespace AutoWifiAuth
             }
             catch (Exception)
             {
-                // access 10.10.42.3
+                // access 10.10.43.3
                 var data = await ih.GetAsync(Configs.Protocol.serverUri);
                 if ((await data.ReadAsStringAsync()).Contains("注销页"))
                 {
@@ -98,6 +98,7 @@ namespace AutoWifiAuth
                 else
                 {
                     AddState("[AuthClient] Error.");
+                    await Task.Delay(5000);
                 }
             }
         }
